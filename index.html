@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rota de Compras</title>
+    <title>Rota Inteligente de Compras</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -343,7 +343,7 @@
     </div>
 
     <script>
-        // Banco de dados simplificado para teste
+        // Banco de dados simplificado
         const comerciosDatabase = {
             "Belo Horizonte": {
                 "São Cristóvão": [
@@ -356,6 +356,10 @@
                     { nome: "Supermercado Bom Preço", tipo: "Supermercado", endereco: "Av. Cristóvão Colombo, 1000", bairro: "Savassi" },
                     { nome: "Açougue Prime", tipo: "Açougue", endereco: "R. Turmalina, 321", bairro: "Savassi" },
                     { nome: "Empório Sabor Mineiro", tipo: "Empório", endereco: "R. Diamante, 567", bairro: "Savassi" }
+                ],
+                "Centro": [
+                    { nome: "Supermercado Central", tipo: "Supermercado", endereco: "Av. Afonso Pena, 1000", bairro: "Centro" },
+                    { nome: "Açougue do Centro", tipo: "Açougue", endereco: "R. da Bahia, 500", bairro: "Centro" }
                 ]
             },
             "Betim": {
@@ -367,6 +371,9 @@
                 "Petrovale": [
                     { nome: "Mercadinho São José", tipo: "Mercadinho", endereco: "R. das Palmeiras, 444", bairro: "Petrovale" },
                     { nome: "Açougue do Gaúcho", tipo: "Açougue", endereco: "R. dos Pinheiros, 555", bairro: "Petrovale" }
+                ],
+                "São João": [
+                    { nome: "Mercado São João", tipo: "Supermercado", endereco: "R. São João, 777", bairro: "São João" }
                 ]
             },
             "Contagem": {
@@ -379,6 +386,9 @@
                 "Nacional": [
                     { nome: "Mercearia da Vila", tipo: "Mercearia", endereco: "R. Nacional, 123", bairro: "Nacional" },
                     { nome: "Supermercado Preço Bom", tipo: "Supermercado", endereco: "Av. Contagem, 456", bairro: "Nacional" }
+                ],
+                "Riacho": [
+                    { nome: "Açougue Riacho", tipo: "Açougue", endereco: "Av. Riacho, 321", bairro: "Riacho" }
                 ]
             }
         };
@@ -476,7 +486,8 @@
                 setTimeout(() => {
                     try {
                         const bairrosSelecionados = Array.from(bairrosCheckboxes).map(cb => cb.value);
-                        gerarRotas(cidade, bairrosSelecionados, historicoManager);
+                        const comerciosSelecionados = gerarComercios(cidade, bairrosSelecionados);
+                        exibirResultados(comerciosSelecionados, historicoManager, cidade);
                     } catch (error) {
                         console.error("Erro ao gerar rotas:", error);
                         statusInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Erro: ${error.message}`;
@@ -488,20 +499,17 @@
                 }, 1500);
             });
             
-            function gerarRotas(cidade, bairrosSelecionados, historicoManager) {
-                // Coletar todos os comércios dos bairros selecionados
-                let comerciosSelecionados = [];
+            // Função para gerar lista de comércios
+            function gerarComercios(cidade, bairrosSelecionados) {
+                let comercios = [];
                 
                 bairrosSelecionados.forEach(bairro => {
                     if (comerciosDatabase[cidade] && comerciosDatabase[cidade][bairro]) {
-                        comerciosSelecionados = [
-                            ...comerciosSelecionados,
-                            ...comerciosDatabase[cidade][bairro]
-                        ];
+                        comercios = comercios.concat(comerciosDatabase[cidade][bairro]);
                     }
                 });
                 
-                // Embaralhar os comércios
+                // Embaralhar os resultados
                 function shuffleArray(array) {
                     for (let i = array.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
@@ -510,24 +518,20 @@
                     return array;
                 }
                 
-                comerciosSelecionados = shuffleArray(comerciosSelecionados);
+                comercios = shuffleArray(comercios);
                 
-                // Limitar a 5 resultados
-                if (comerciosSelecionados.length > 5) {
-                    comerciosSelecionados.length = 5;
-                }
-                
-                // Exibir resultados
-                exibirResultados(comerciosSelecionados, historicoManager);
+                // Limitar a 6 resultados
+                return comercios.slice(0, 6);
             }
             
-            function exibirResultados(comerciosSelecionados, historicoManager) {
+            // Função para exibir resultados
+            function exibirResultados(comerciosSelecionados, historicoManager, cidade) {
                 comerciosContainer.innerHTML = '';
                 
                 if (comerciosSelecionados.length === 0) {
                     comerciosContainer.innerHTML = `
-                        <div class="empty-result">
-                            <i class="fas fa-store-slash"></i>
+                        <div style="text-align: center; grid-column: 1/-1; padding: 40px;">
+                            <i class="fas fa-store-slash" style="font-size: 3rem; color: #4b6cb7; margin-bottom: 20px;"></i>
                             <h3>Nenhum comércio encontrado</h3>
                             <p>Tente selecionar outros bairros ou cidade</p>
                         </div>
@@ -549,7 +553,7 @@
                             <p><strong>Tipo:</strong> ${comercio.tipo}</p>
                             <p><strong>Endereço:</strong> ${comercio.endereco}</p>
                             <p><strong>Bairro:</strong> ${comercio.bairro}</p>
-                            <p><strong>Cidade:</strong> ${cidadeSelect.value}</p>
+                            <p><strong>Cidade:</strong> ${cidade}</p>
                         </div>
                         ${jaUtilizado ? '<span class="used-tag"><i class="fas fa-check-circle"></i> Já visitado</span>' : ''}
                     `;
