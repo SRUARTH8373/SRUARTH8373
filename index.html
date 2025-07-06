@@ -1,91 +1,576 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- ... (cabeçalho igual ao original) ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rota de Compras</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ... (estilos iguais ao original) ... */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .config-panel {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #182848;
+            font-size: 1.1rem;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input:focus {
+            border-color: #4b6cb7;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(75, 108, 183, 0.2);
+        }
+        
+        .multi-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f5f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #ddd;
+        }
+        
+        .checkbox-option:hover {
+            background: #e1ecff;
+            border-color: #4b6cb7;
+        }
+        
+        .checkbox-option input {
+            width: auto;
+            cursor: pointer;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #btn-gerar {
+            background: linear-gradient(90deg, #00C9FF 0%, #92FE9D 100%);
+            color: #182848;
+        }
+        
+        #btn-gerar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 201, 255, 0.4);
+        }
+        
+        #btn-limpar {
+            background: linear-gradient(90deg, #FF416C 0%, #FF4B2B 100%);
+            color: white;
+        }
+        
+        #btn-limpar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(255, 65, 108, 0.4);
+        }
+        
+        .status {
+            text-align: center;
+            padding: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #status-info {
+            font-size: 1.1rem;
+            color: #4b6cb7;
+            font-weight: 500;
+        }
+        
+        #loading {
+            display: none;
+            font-size: 3rem;
+            color: #4b6cb7;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .resultados {
+            padding: 30px;
+            display: none;
+        }
+        
+        .comercios-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .comercio-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #eaeaea;
+            position: relative;
+        }
+        
+        .comercio-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .comercio-header {
+            background: linear-gradient(90deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            padding: 20px;
+        }
+        
+        .comercio-body {
+            padding: 20px;
+        }
+        
+        .comercio-body p {
+            margin: 12px 0;
+            font-size: 1.05rem;
+        }
+        
+        .comercio-body strong {
+            color: #2c3e50;
+        }
+        
+        .used-tag {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .comercio-card.used {
+            opacity: 0.8;
+            position: relative;
+        }
+        
+        .comercio-card.used::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 1;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: #f1f8ff;
+            color: #4b6cb7;
+            font-weight: 500;
+            border-top: 1px solid #e3f2fd;
+        }
+        
+        @media (max-width: 768px) {
+            .multi-select {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- ... (corpo igual ao original) ... -->
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-route"></i> Rota Inteligente de Compras</h1>
+            <p>Gere rotas otimizadas para mercados e açougues próximos a você</p>
+        </header>
+        
+        <section class="config-panel">
+            <div class="input-group">
+                <label for="cidade"><i class="fas fa-city"></i> Selecione sua cidade:</label>
+                <select id="cidade">
+                    <option value="">-- Selecione uma cidade --</option>
+                    <option value="Belo Horizonte">Belo Horizonte</option>
+                    <option value="Betim">Betim</option>
+                    <option value="Contagem">Contagem</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label><i class="fas fa-map-marker-alt"></i> Selecione os bairros:</label>
+                <div class="multi-select" id="bairros-container">
+                    <!-- Bairros serão carregados dinamicamente -->
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button id="btn-gerar">
+                    <i class="fas fa-bolt"></i> Gerar Rota
+                </button>
+                <button id="btn-limpar">
+                    <i class="fas fa-eraser"></i> Limpar Seleção
+                </button>
+            </div>
+        </section>
+        
+        <section class="status">
+            <div id="status-info">
+                <i class="fas fa-info-circle"></i> Selecione uma cidade e bairros para começar
+            </div>
+            <div id="loading">
+                <i class="fas fa-spinner"></i>
+            </div>
+        </section>
+        
+        <section class="resultados" id="resultados-container">
+            <h2 style="text-align: center; margin-bottom: 20px; color: #2c3e50;">
+                <i class="fas fa-store"></i> Comércios Recomendados
+            </h2>
+            <div class="comercios-container" id="comercios-container">
+                <!-- Resultados serão inseridos aqui -->
+            </div>
+        </section>
+        
+        <footer>
+            <p><i class="fas fa-sync-alt"></i> Atualizado em: 06/07/2025 | Sua rota inteligente de compras</p>
+        </footer>
+    </div>
 
     <script>
         // Banco de dados simplificado para teste
         const comerciosDatabase = {
             "Belo Horizonte": {
                 "São Cristóvão": [
-                    { nome: "Mercearia do Zé", tipo: "Mercearia", endereco: "R. Topázio, 123" },
-                    { nome: "Açougue Carnes Nobres", tipo: "Açougue", endereco: "R. Safira, 222" },
-                    // ... (adicionar mais itens)
+                    { nome: "Mercearia do Zé", tipo: "Mercearia", endereco: "R. Topázio, 123", bairro: "São Cristóvão" },
+                    { nome: "Açougue Carnes Nobres", tipo: "Açougue", endereco: "R. Safira, 222", bairro: "São Cristóvão" },
+                    { nome: "Hortifruti Natural", tipo: "Hortifrúti", endereco: "R. Esmeralda, 45", bairro: "São Cristóvão" },
+                    { nome: "Padaria Pão Quente", tipo: "Padaria", endereco: "R. Rubi, 78", bairro: "São Cristóvão" }
                 ],
-                // ... (outros bairros)
+                "Savassi": [
+                    { nome: "Supermercado Bom Preço", tipo: "Supermercado", endereco: "Av. Cristóvão Colombo, 1000", bairro: "Savassi" },
+                    { nome: "Açougue Prime", tipo: "Açougue", endereco: "R. Turmalina, 321", bairro: "Savassi" },
+                    { nome: "Empório Sabor Mineiro", tipo: "Empório", endereco: "R. Diamante, 567", bairro: "Savassi" }
+                ]
             },
             "Betim": {
                 "Alterosa": [
-                    { nome: "Mercearia Mineirinha", tipo: "Mercearia", endereco: "R. Cristal, 111" },
-                    // ... (adicionar mais itens)
+                    { nome: "Mercearia Mineirinha", tipo: "Mercearia", endereco: "R. Cristal, 111", bairro: "Alterosa" },
+                    { nome: "Supermercado Econômico", tipo: "Supermercado", endereco: "Av. das Flores, 222", bairro: "Alterosa" },
+                    { nome: "Frigorífico Carnes Finas", tipo: "Açougue", endereco: "R. das Pedras, 333", bairro: "Alterosa" }
                 ],
-                // ... (outros bairros)
+                "Petrovale": [
+                    { nome: "Mercadinho São José", tipo: "Mercadinho", endereco: "R. das Palmeiras, 444", bairro: "Petrovale" },
+                    { nome: "Açougue do Gaúcho", tipo: "Açougue", endereco: "R. dos Pinheiros, 555", bairro: "Petrovale" }
+                ]
             },
             "Contagem": {
                 "Eldorado": [
-                    { nome: "Mercadinho do Trabalhador", tipo: "Mercadinho", endereco: "R. do Trabalho, 999" },
-                    // ... (adicionar mais itens)
+                    { nome: "Mercadinho do Trabalhador", tipo: "Mercadinho", endereco: "R. do Trabalho, 999", bairro: "Eldorado" },
+                    { nome: "Supermercado Mais Barato", tipo: "Supermercado", endereco: "Av. Industrial, 888", bairro: "Eldorado" },
+                    { nome: "Açougue Qualidade", tipo: "Açougue", endereco: "R. Comercial, 777", bairro: "Eldorado" },
+                    { nome: "Hortifruti Frescor", tipo: "Hortifrúti", endereco: "R. das Hortênsias, 666", bairro: "Eldorado" }
                 ],
-                // ... (outros bairros)
+                "Nacional": [
+                    { nome: "Mercearia da Vila", tipo: "Mercearia", endereco: "R. Nacional, 123", bairro: "Nacional" },
+                    { nome: "Supermercado Preço Bom", tipo: "Supermercado", endereco: "Av. Contagem, 456", bairro: "Nacional" }
+                ]
             }
         };
 
         // Sistema de histórico
         class HistoricoManager {
-            // ... (código igual ao original) ...
+            constructor() {
+                this.historicoKey = 'comerciosVisitados';
+                this.historico = this.carregarHistorico();
+            }
+            
+            carregarHistorico() {
+                const historicoSalvo = localStorage.getItem(this.historicoKey);
+                return historicoSalvo ? JSON.parse(historicoSalvo) : [];
+            }
+            
+            salvarHistorico() {
+                localStorage.setItem(this.historicoKey, JSON.stringify(this.historico));
+            }
+            
+            comercioJaUtilizado(comercioId) {
+                return this.historico.includes(comercioId);
+            }
+            
+            adicionarComercio(comercioId) {
+                if (!this.comercioJaUtilizado(comercioId)) {
+                    this.historico.push(comercioId);
+                    this.salvarHistorico();
+                }
+            }
+            
+            limparHistorico() {
+                this.historico = [];
+                localStorage.removeItem(this.historicoKey);
+            }
         }
 
         // Inicialização do sistema
         document.addEventListener('DOMContentLoaded', () => {
             const historicoManager = new HistoricoManager();
             const btnGerar = document.getElementById('btn-gerar');
+            const btnLimpar = document.getElementById('btn-limpar');
+            const cidadeSelect = document.getElementById('cidade');
+            const bairrosContainer = document.getElementById('bairros-container');
             const statusInfo = document.getElementById('status-info');
             const loading = document.getElementById('loading');
             const resultadosContainer = document.getElementById('resultados-container');
+            const comerciosContainer = document.getElementById('comercios-container');
             
+            // Carregar bairros quando cidade for selecionada
+            cidadeSelect.addEventListener('change', () => {
+                const cidade = cidadeSelect.value;
+                bairrosContainer.innerHTML = '';
+                
+                if (cidade && comerciosDatabase[cidade]) {
+                    Object.keys(comerciosDatabase[cidade]).forEach(bairro => {
+                        const option = document.createElement('div');
+                        option.className = 'checkbox-option';
+                        option.innerHTML = `
+                            <input type="checkbox" id="bairro-${bairro}" value="${bairro}">
+                            <label for="bairro-${bairro}">${bairro}</label>
+                        `;
+                        bairrosContainer.appendChild(option);
+                    });
+                    
+                    statusInfo.innerHTML = `<i class="fas fa-check-circle"></i> Selecione os bairros desejados`;
+                } else {
+                    statusInfo.innerHTML = `<i class="fas fa-info-circle"></i> Selecione uma cidade para ver os bairros`;
+                }
+            });
+            
+            // Botão Limpar
+            btnLimpar.addEventListener('click', () => {
+                cidadeSelect.value = '';
+                bairrosContainer.innerHTML = '';
+                resultadosContainer.style.display = 'none';
+                statusInfo.innerHTML = `<i class="fas fa-info-circle"></i> Selecione uma cidade e bairros para começar`;
+                historicoManager.limparHistorico();
+            });
+            
+            // Botão Gerar Rota
             btnGerar.addEventListener('click', () => {
+                const cidade = cidadeSelect.value;
+                const bairrosCheckboxes = bairrosContainer.querySelectorAll('input[type="checkbox"]:checked');
+                
+                if (!cidade || bairrosCheckboxes.length === 0) {
+                    statusInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Selecione uma cidade e pelo menos um bairro`;
+                    return;
+                }
+                
                 statusInfo.style.display = 'none';
                 loading.style.display = 'block';
+                resultadosContainer.style.display = 'none';
                 
                 setTimeout(() => {
                     try {
-                        gerarRotas(historicoManager);
+                        const bairrosSelecionados = Array.from(bairrosCheckboxes).map(cb => cb.value);
+                        gerarRotas(cidade, bairrosSelecionados, historicoManager);
                     } catch (error) {
                         console.error("Erro ao gerar rotas:", error);
                         statusInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Erro: ${error.message}`;
+                        statusInfo.style.display = 'block';
                     } finally {
                         loading.style.display = 'none';
                         resultadosContainer.style.display = 'block';
                     }
                 }, 1500);
             });
-        });
-
-        function gerarRotas(historicoManager) {
-            // ... (código igual ao original até a linha 355) ...
             
-            // Exibir resultados
-            exibirResultados(cidade, bairrosSelecionados, historicoManager);
-        }
-
-        function exibirResultados(cidade, bairrosSelecionados, historicoManager) {
-            // ... (código igual ao original até o loop de comércios) ...
-            
-            comerciosSelecionados.forEach((comercio, comercioIndex) => {
-                // CORREÇÃO AQUI (template string com aspas):
-                const comercioId = `${comercio.nome}-${comercio.endereco}`;
+            function gerarRotas(cidade, bairrosSelecionados, historicoManager) {
+                // Coletar todos os comércios dos bairros selecionados
+                let comerciosSelecionados = [];
                 
-                if (!historicoManager.comercioJaUtilizado(comercioId)) {
-                    // ... (restante do código igual) ...
+                bairrosSelecionados.forEach(bairro => {
+                    if (comerciosDatabase[cidade] && comerciosDatabase[cidade][bairro]) {
+                        comerciosSelecionados = [
+                            ...comerciosSelecionados,
+                            ...comerciosDatabase[cidade][bairro]
+                        ];
+                    }
+                });
+                
+                // Embaralhar os comércios
+                function shuffleArray(array) {
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                    return array;
                 }
-            });
-        }
+                
+                comerciosSelecionados = shuffleArray(comerciosSelecionados);
+                
+                // Limitar a 5 resultados
+                if (comerciosSelecionados.length > 5) {
+                    comerciosSelecionados.length = 5;
+                }
+                
+                // Exibir resultados
+                exibirResultados(comerciosSelecionados, historicoManager);
+            }
+            
+            function exibirResultados(comerciosSelecionados, historicoManager) {
+                comerciosContainer.innerHTML = '';
+                
+                if (comerciosSelecionados.length === 0) {
+                    comerciosContainer.innerHTML = `
+                        <div class="empty-result">
+                            <i class="fas fa-store-slash"></i>
+                            <h3>Nenhum comércio encontrado</h3>
+                            <p>Tente selecionar outros bairros ou cidade</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                comerciosSelecionados.forEach(comercio => {
+                    const comercioId = `${comercio.nome}-${comercio.endereco}`;
+                    const jaUtilizado = historicoManager.comercioJaUtilizado(comercioId);
+                    
+                    const comercioCard = document.createElement('div');
+                    comercioCard.className = `comercio-card ${jaUtilizado ? 'used' : ''}`;
+                    comercioCard.innerHTML = `
+                        <div class="comercio-header">
+                            <h3>${comercio.nome}</h3>
+                        </div>
+                        <div class="comercio-body">
+                            <p><strong>Tipo:</strong> ${comercio.tipo}</p>
+                            <p><strong>Endereço:</strong> ${comercio.endereco}</p>
+                            <p><strong>Bairro:</strong> ${comercio.bairro}</p>
+                            <p><strong>Cidade:</strong> ${cidadeSelect.value}</p>
+                        </div>
+                        ${jaUtilizado ? '<span class="used-tag"><i class="fas fa-check-circle"></i> Já visitado</span>' : ''}
+                    `;
+                    
+                    if (!jaUtilizado) {
+                        comercioCard.addEventListener('click', () => {
+                            historicoManager.adicionarComercio(comercioId);
+                            comercioCard.classList.add('used');
+                            
+                            // Adiciona a tag de "já visitado"
+                            const usedTag = document.createElement('span');
+                            usedTag.className = 'used-tag';
+                            usedTag.innerHTML = '<i class="fas fa-check-circle"></i> Já visitado';
+                            comercioCard.appendChild(usedTag);
+                        });
+                    }
+                    
+                    comerciosContainer.appendChild(comercioCard);
+                });
+            }
+        });
     </script>
 </body>
 </html>
